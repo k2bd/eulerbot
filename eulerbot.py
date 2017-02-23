@@ -111,7 +111,7 @@ def handle_command(user,command,channel):
             if i > places:
                 break
 
-            response += (str(i)+": "+str(problem)+" "+id_to_name[user]+"\n")
+            response += (str(i)+": "+str(problem)+" "+id_to_name[leaderboard[problem]]+"\n")
 
             i += 1
 
