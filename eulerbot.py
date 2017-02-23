@@ -29,7 +29,7 @@ def backup(leaderboard):
     json.dump(leaderboard,outfile)
     outfile.close()
 
-def handle_command(user,command,channel):
+def handle_command(user,command,channel,id_to_name):
     '''
      Recieves a command and parses it.
      Known commands:
@@ -44,46 +44,55 @@ def handle_command(user,command,channel):
         return
 
     # TODO fix next line with an OOP solution
-    id_to_name = getUsers()
+    #id_to_name = getUsers()
     if user not in id_to_name.keys():
         id_to_name = getUsers()
 
     cmd = command.split()
+    args = cmd[1:]
     if cmd[0] == 'solve':
         # Mark the problem provided as solved
-        try:
-            prob = int(cmd[1])
-        except ValueError:
-            respose = "Usage: @eulerbot solve n"
-            respond(response)
-            return
-        if user not in solved_problems:
-            solved_problems[user] = []
-        if prob not in solved_problems[user]:
-            solved_problems[user].append(prob)
-            response = "Marked problem "+str(prob)+" as solved by "+id_to_name[user]+"."
-            respond(response)
+        response = "Marked problems ("
+        for i in range(len(args)):
+            try:
+                prob = int(args[i])
+            except ValueError:
+                # Stop on the first non-int we come to
+                break
+
+            if user not in solved_problems:
+                solved_problems[user] = []
+            if prob not in solved_problems[user]:
+                solved_problems[user].append(prob)
+                response += str(prob)+","
+
+        response += ") as solved by "+id_to_name[user]+"."
+        respond(response)
         # Now backup what we've got
         backup(solved_problems)
         return
 
     elif cmd[0] == 'unsolve':
         # Unsolve a problem that was marked as solved
-        try:
-            prob = int(cmd[1])
-        except ValueError:
-            response = "Usage: @eulerbot unsolve n"
-            respond(response)
-            return
-        if user in solved_problems:
-            if prob in solved_problems[user]:
-                solved_problems[user].remove(prob)
-                response = "Marked problem "+str(prob)+" as not solved by "+id_to_name[user]+"."
-                respond(response)
+
+        response = "Marked problems ("
+        for i in range(len(args)):
+            try:
+                prob = int(args[i])
+            except ValueError:
+                break
+
+            if user in solved_problems:
+                if prob in solved_problems[user]:
+                    solved_problems[user].remove(prob)
+                    response += str(prob)+","
+
+        response += ") as not solved by "+id_to_name[user]+"."
+        respond(response)
         # Now backup what we've got
         backup(solved_problems)
         return
-    
+
     elif cmd[0] == 'leaderboard':
         if len(cmd) > 1:
             try:
@@ -95,15 +104,16 @@ def handle_command(user,command,channel):
 
         leaderboard = {} # Reversed dictionary {problem: solver}
         for user in solved_problems:
-            for problem in solved_problems[user]:
-                unique = True
-                for other_user in solved_problems:
-                    if user is not other_user:
-                        if problem in solved_problems[other_user]:
-                            unique = False
-                            break
-                if unique:
-                    leaderboard[problem] = user
+            if user in id_to_name.keys():
+                for problem in solved_problems[user]:
+                    unique = True
+                    for other_user in solved_problems:
+                        if user is not other_user:
+                            if problem in solved_problems[other_user]:
+                                unique = False
+                                break
+                    if unique:
+                        leaderboard[problem] = user
 
         i = 1
         response = '```\n'
@@ -173,7 +183,7 @@ if __name__ == '__main__':
         while True:
             user, command, channel = parse_slack_output(slack_client.rtm_read())
             if command and channel:
-                handle_command(user, command, channel)
+                handle_command(user, command, channel,id_to_name)
             time.sleep(READ_WEBSOCKET_DELAY)
     else:
         print("Connection failed. Invalid Slack token or bot ID?")
