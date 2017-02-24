@@ -98,13 +98,13 @@ def handle_command(user,command,channel,id_to_name):
         respond(response)
 
     elif cmd[0] == 'leaderboard':
-        if len(cmd) > 1:
-            try:
-                places = int(cmd[1])
-            except ValueError:
-                pass
-        else:
-            places = 10
+        #if len(cmd) > 1:
+        #    try:
+        #        places = int(cmd[1])
+        #    except ValueError:
+        #        pass
+        #else:
+        places = 10
 
         leaderboard = {} # Reversed dictionary {problem: solver}
         for user in solved_problems:
