@@ -96,6 +96,7 @@ def handle_command(user,command,channel,id_to_name):
     elif cmd[0] == 'hello':
         response = 'Hello Alice!'
         respond(response)
+        return
 
     elif cmd[0] == 'leaderboard':
         #if len(cmd) > 1:
