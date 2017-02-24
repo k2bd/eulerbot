@@ -93,6 +93,10 @@ def handle_command(user,command,channel,id_to_name):
         backup(solved_problems)
         return
 
+    elif cmd[0] == 'hello':
+        response = 'Hello Alice!'
+        respond(response)
+
     elif cmd[0] == 'leaderboard':
         if len(cmd) > 1:
             try:
